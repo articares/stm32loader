@@ -259,7 +259,7 @@ class Stm32Bootloader:
         # ST RM4510 25.1 Memory size register
         "L0": 0x1FF8007C,
         # ST RM0444 section 38.2 Flash memory size data register
-        "G0": 0x1FFF75E0,
+        "G0": 0x1FFF75E0
     }
 
     DATA_TRANSFER_SIZE = {

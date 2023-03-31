@@ -1,0 +1,84 @@
+python -m stm32loader -p COM4 -b 115200 -P none -V -f G0
+
+
+
+PS C:\repos\stm32loader> python -m stm32loader -h                       
+usage: stm32loader [-h] [-e] [-u] [-w] [-v] [-r] [-l LENGTH] -p PORT [-b BAUD] [-a ADDRESS] [-g ADDRESS] [-f FAMILY] [-V] [-q] [-s] [-R] [-B] [-n] [-P {even,none}] [--version] [FILE.BIN]
+
+Flash firmware to STM32 microcontrollers.
+
+positional arguments:
+  FILE.BIN              File to read from or store to flash.
+
+options:
+  -h, --help            show this help message and exit
+  -e, --erase           Erase (note: this is required on previously written memory).
+  -u, --unprotect       Unprotect in case erase fails.
+  -w, --write           Write file content to flash.
+  -v, --verify          Verify flash content versus local file (recommended).
+  -r, --read            Read from flash and store in local file.
+  -l LENGTH, --length LENGTH
+                        Length of read.
+  -p PORT, --port PORT  Serial port (default: $STM32LOADER_SERIAL_PORT).
+  -b BAUD, --baud BAUD  Baudrate. (default: 115200)
+  -a ADDRESS, --address ADDRESS
+                        Target address. (default: 134217728)
+  -g ADDRESS, --go-address ADDRESS
+                        Start executing from address (0x08000000, usually).
+  -f FAMILY, --family FAMILY
+                        Device family to read out device UID and flash size; e.g F1 for STM32F1xx (default: $STM32LOADER_FAMILY).
+  -V, --verbose         Verbose mode.
+  -q, --quiet           Quiet mode.
+  -s, --swap-rts-dtr    Swap RTS and DTR: use RTS for reset and DTR for boot0.
+  -R, --reset-active-high
+                        Make RESET active high.
+  -B, --boot0-active-low
+                        Make BOOT0 active low.
+  -n, --no-progress     Don't show progress bar.
+  -P {even,none}, --parity {even,none}
+                        Parity: "even" for STM32, "none" for BlueNRG. (default: even)
+  --version             show program's version number and exit
+
+examples:
+  stm32loader -p COM7 -f F1
+  stm32loader -e -w -v example/main.bin
+
+
+
+
+
+
+  PS C:\repos\stm32loader> python -m stm32loader -p COM4 -b 115200 -P none -V -f G0
+Open port COM4, baud 115200
+Read:  b'\x1f\x1f\x1f\x1f\x1f\x1f'
+Write:  b'\x00'
+Read:  b'\x1f'
+*** Command: Get
+Write:  b'\x00'
+Write:  b'\xff'
+Read:  b'y'
+Read:  b'\x0b'
+Read:  b'1'
+    Bootloader version: 0x31
+Read:  b'\x00\x01\x02\x11!1Dcs\x82\x92'
+    Available commands: 0x0, 0x1, 0x2, 0x11, 0x21, 0x31, 0x44, 0x63, 0x73, 0x82, 0x92
+Read:  b'y'
+Bootloader version: 0x31
+*** Command: Get ID
+Write:  b'\x02'   
+Write:  b'\xfd'
+Read:  b'y'
+Read:  b'\x01'
+Read:  b'\x04`'
+Read:  b'y'
+Chip id: 0x460 (STM32G0x1)
+*** Command: Read memory
+Write:  b'\x11'
+Write:  b'\xee'
+Read:  b'y'
+Write:  bytearray(b'\x1f\xff\xf7\xe0\xf7')
+Read:  b'\x1f'
+Something was wrong with reading chip family data: NACK 0x11 address failed
+
+
+python -m stm32loader -p COM4 -b 115200 -P none -V -f G0 -r read/mem.bin -l 128 -a 536836096

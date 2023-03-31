@@ -290,19 +290,19 @@ class Stm32Loader:
         show_progress = self._get_progress_bar(self.configuration.no_progress)
 
         self.stm32 = bootloader.Stm32Bootloader(
-            serial_connection, verbosity=self.configuration.verbosity, show_progress=show_progress
+            serial_connection, self.configuration.family, verbosity=self.configuration.verbosity, show_progress=show_progress
         )
 
-        try:
-            print("Activating bootloader (select UART)")
-            self.stm32.reset_from_system_memory()
-        except bootloader.CommandError:
-            print(
-                "Can't init into bootloader. Ensure that BOOT0 is enabled and reset the device.",
-                file=sys.stderr,
-            )
-            self.stm32.reset_from_flash()
-            sys.exit(1)
+        # try:
+        #     print("Activating bootloader (select UART)")
+        #     self.stm32.reset_from_system_memory()
+        # except bootloader.CommandError:
+        #     print(
+        #         "Can't init into bootloader. Ensure that BOOT0 is enabled and reset the device.",
+        #         file=sys.stderr,
+        #     )
+        #     self.stm32.reset_from_flash()
+        #     sys.exit(1)
 
     def perform_commands(self):
         """Run all operations as defined by the configuration."""
@@ -389,6 +389,16 @@ class Stm32Loader:
         self.debug(0, "Device UID: %s" % device_uid_string)
         self.debug(0, "Flash size: %d KiB" % flash_size)
 
+    def sync(self):
+        """Show chip ID and bootloader version."""
+        read_data = bytearray(self.stm32.connection.read(20))
+        self.stm32.connection.write(bytes([0x00]))
+        read_data = bytearray(self.stm32.connection.read(1))
+        if len(read_data) == 0:
+            self.stm32.connection.write(bytes([0x00]))
+            read_data = bytearray(self.stm32.connection.read(1))
+
+      
     @staticmethod
     def _get_progress_bar(no_progress=False):
         if no_progress or not progress_bar:
@@ -408,6 +418,7 @@ def main(*args, **kwargs):
         loader.parse_arguments(args)
         loader.connect()
         try:
+            loader.sync()
             loader.read_device_id()
             loader.read_device_uid()
             loader.perform_commands()

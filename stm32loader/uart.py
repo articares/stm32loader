@@ -87,11 +87,19 @@ class SerialConnection:
 
     def write(self, *args, **kwargs):
         """Write the given data to the serial connection."""
+     
+        #Iterate over all args, convert them to str, and join them
+        args_str = ','.join(map(str,args))
+        #Iterater over all kwargs, convert them into k=v and join them
+        kwargs_str = ','.join('{}={}'.format(k,v) for k,v in kwargs.items())
+        print("Write: ",args_str," ",kwargs_str)
         return self.serial_connection.write(*args, **kwargs)
 
     def read(self, *args, **kwargs):
         """Read the given amount of bytes from the serial connection."""
-        return self.serial_connection.read(*args, **kwargs)
+        read_data=self.serial_connection.read(*args, **kwargs)
+        print("Read: ",read_data)
+        return read_data#self.serial_connection.read(*args, **kwargs)
 
     def enable_reset(self, enable=True):
         """Enable or disable the reset IO line."""
