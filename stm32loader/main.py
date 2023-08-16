@@ -23,6 +23,7 @@
 
 import argparse
 import atexit
+from cgitb import reset
 import copy
 import os
 import sys
@@ -333,12 +334,17 @@ class Stm32Loader:
                 self.stm32.reset_from_flash()
                 sys.exit(1)
         if self.configuration.write:
-            self.stm32.write_memory_data(self.configuration.address, binary_data)
+            try:
+                self.stm32.write_memory_data(self.configuration.address, binary_data)
+            except bootloader.AddressError as e:
+                print("Invalid Address, \n Expected Address between: 134258688 and 134342656")
+                sys.exit(1)
         if self.configuration.verify:
             read_data = self.stm32.read_memory_data(self.configuration.address, len(binary_data))
             try:
                 bootloader.Stm32Bootloader.verify_data(read_data, binary_data)
                 print("Verification OK")
+                self.stm32.reset_from_flash()
             except bootloader.DataMismatchError as e:
                 print("Verification FAILED: %s" % e, file=sys.stdout)
                 sys.exit(1)

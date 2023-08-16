@@ -92,6 +92,9 @@ class DataLengthError(Stm32LoaderError, ValueError):
 
 class DataMismatchError(Stm32LoaderError):
     """Exception: data comparison failed."""
+ 
+class AddressError(Stm32LoaderError):
+    """Exception: address failed."""
 
 
 class ShowProgress:
@@ -551,6 +554,7 @@ class Stm32Bootloader:
         Supports maximum 256 bytes.
         """
         nr_of_bytes = len(data)
+        
         if nr_of_bytes == 0:
             return
         if nr_of_bytes > self.data_transfer_size:
@@ -695,6 +699,11 @@ class Stm32Bootloader:
         Length may be more than 256 bytes.
         """
         data = bytearray()
+        try:
+            if address < 134258688:
+                raise AddressError('Expected Address between: 134258688 and 134342656')
+        except AddressError as e:
+            print(f"Invalid Address {e}") 
         chunk_count = int(math.ceil(length / float(self.data_transfer_size)))
         self.debug(5, "Read %d chunks at address 0x%X..." % (chunk_count, address))
         with self.show_progress("Reading", maximum=chunk_count) as progress_bar:
@@ -718,6 +727,11 @@ class Stm32Bootloader:
         Data length may be more than 256 bytes.
         """
         length = len(data)
+        try:
+            if address < 134258688:
+                raise AddressError("Expected Address between: 134258688 and 134342656")
+        except AddressError as e:
+            print(f"Invalid Address {e}")
         chunk_count = int(math.ceil(length / float(self.data_transfer_size)))
         offset = 0
         self.debug(5, "Write %d chunks at address 0x%X..." % (chunk_count, address))
@@ -752,7 +766,7 @@ class Stm32Bootloader:
 
         if len(read_data) != len(reference_data):
             raise DataMismatchError(
-                "Data length does not match: %d bytes vs %d bytes."
+                "Data length does not match: %d bytes vs %d bytes." 
                 % (len(read_data), len(reference_data))
             )
 
@@ -800,6 +814,12 @@ class Stm32Bootloader:
         """Return the given address as big-endian bytes with a checksum."""
         # address in four bytes, big-endian
         address_bytes = bytearray(struct.pack(">I", address))
+        try:
+            if address < 134258688:
+                raise AddressError('Expected Address between: 134258688 and 134342656')
+        except AddressError as e:
+            print(f"Invalid Address {e}")
+        
         # checksum as single byte
         checksum_byte = struct.pack("B", reduce(operator.xor, address_bytes))
         return address_bytes + checksum_byte
